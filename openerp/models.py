@@ -4447,15 +4447,17 @@ class BaseModel(object):
             else:
                 domain = [('active', '=', 1)]
 
+        uses_auto_join = False
         if domain:
             e = expression.expression(cr, user, domain, self, context)
             tables = e.get_tables()
             where_clause, where_params = e.to_sql()
             where_clause = where_clause and [where_clause] or []
+            uses_auto_join = e.uses_auto_join
         else:
             where_clause, where_params, tables = [], [], ['"%s"' % self._table]
 
-        return Query(tables, where_clause, where_params)
+        return Query(tables, where_clause, where_params, uses_auto_join=uses_auto_join)
 
     def _check_qorder(self, word):
         if not regex_order.match(word):
@@ -4651,7 +4653,7 @@ class BaseModel(object):
         limit_str = limit and ' limit %d' % limit or ''
         offset_str = offset and ' offset %d' % offset or ''
         query_str = 'SELECT %s "%s".id FROM ' % (
-            'DISTINCT ON (' +
+            ('DISTINCT ON (' +
              ','.join(
                  ([
                      x.strip()[:-4]
@@ -4663,7 +4665,8 @@ class BaseModel(object):
                      for x in self._generate_order_by_elements(order, query)
                  ] if order_by else []) +
                  ['"%s".id' % self._table]
-            ) + ')',
+            ) + ')')
+            if query.uses_auto_join else '',
             self._table,
         ) + from_clause + where_str + order_by + limit_str + offset_str
         cr.execute(query_str, where_clause_params)

@@ -39,7 +39,7 @@ class Query(object):
       - etc.
     """
 
-    def __init__(self, tables=None, where_clause=None, where_clause_params=None, joins=None):
+    def __init__(self, tables=None, where_clause=None, where_clause_params=None, joins=None, uses_auto_join=False):
 
         # holds the list of tables joined using default JOIN.
         # the table names are stored double-quoted (backwards compatibility)
@@ -66,6 +66,7 @@ class Query(object):
         #       SELECT ... FROM "table_a" LEFT JOIN "table_b" ON ("table_a"."table_a_col1" = "table_b"."table_b_col")
         #                                 LEFT JOIN "table_c" ON ("table_a"."table_a_col2" = "table_c"."table_c_col")
         self.joins = joins or {}
+        self.uses_auto_join = uses_auto_join
 
     def _get_table_aliases(self):
         from openerp.osv.expression import get_alias_from_query
