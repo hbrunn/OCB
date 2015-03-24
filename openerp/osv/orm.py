@@ -5006,28 +5006,31 @@ class BaseModel(object):
         limit_str = limit and ' limit %d' % limit or ''
         offset_str = offset and ' offset %d' % offset or ''
         where_str = where_clause and (" WHERE %s" % where_clause) or ''
+        distinct_str = 'DISTINCT ON (' + ','.join((
+            [
+                x.strip()[:-4]
+                if x.strip().upper().endswith('DESC')
+                else
+                x.strip()[:-3]
+                if x.strip().upper().endswith('ASC')
+                else x
+                for x in self._generate_order_by_elements(order, query)
+            ] if order_by else []) + ['"%s".id' % self._table]) + ')'
 
         if count:
-            cr.execute('SELECT count("%s".id) FROM ' % self._table + from_clause + where_str + limit_str + offset_str, where_clause_params)
+            query_str = (
+                'SELECT count(*) FROM (SELECT ' + distinct_str +
+                ' "%s".id FROM ' % self._table + from_clause + where_str +
+                limit_str + offset_str + ') count_tmp'
+            )
+            cr.execute(query_str, where_clause_params)
             res = cr.fetchall()
             return res[0][0]
 
-        query_str = 'SELECT %s "%s".id FROM ' % (
-            'DISTINCT ON (' +
-             ','.join(
-                 ([
-                     x.strip()[:-4]
-                     if x.strip().upper().endswith('DESC')
-                     else
-                     x.strip()[:-3]
-                     if x.strip().upper().endswith('ASC')
-                     else x
-                     for x in self._generate_order_by_elements(order, query)
-                 ] if order_by else []) +
-                 ['"%s".id' % self._table]
-            ) + ')',
-            self._table,
-        ) + from_clause + where_str + order_by + limit_str + offset_str
+        query_str = (
+            'SELECT ' + distinct_str + ' "%s".id FROM ' % self._table +
+            from_clause + where_str + order_by + limit_str + offset_str
+        )
         cr.execute(query_str, where_clause_params)
 
         res = cr.fetchall()
