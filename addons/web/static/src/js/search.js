@@ -1572,11 +1572,12 @@ instance.web.search.DateField = instance.web.search.Field.extend(/** @lends inst
     value_from: function (facetValue) {
         return instance.web.date_to_str(facetValue.get('value'));
     },
-    complete: function (needle) {
+    parse_from_string: function(str)
+    {
         var d;
         try {
             var t = (this.attrs && this.attrs.type === 'datetime') ? 'datetime' : 'date';
-            var v = instance.web.parse_value(needle, {'widget': t});
+            var v = instance.web.parse_value(str, {'widget': t});
             if (t === 'datetime'){
                 d = instance.web.str_to_datetime(v);
             }
@@ -1586,6 +1587,10 @@ instance.web.search.DateField = instance.web.search.Field.extend(/** @lends inst
         } catch (e) {
             // pass
         }
+        return d;
+    },
+    complete: function (needle) {
+        var d = this.parse_from_string(needle);
         if (!d) { return $.when(null); }
         var date_string = instance.web.format_value(d, this.attrs);
         var label = _.str.sprintf(_.str.escapeHTML(
@@ -1600,7 +1605,15 @@ instance.web.search.DateField = instance.web.search.Field.extend(/** @lends inst
                 values: [{label: date_string, value: d}]
             }
         }]);
-    }
+    },
+    facet_for: function(value)
+    {
+        if(typeof(value) == 'string')
+        {
+            value = this.parse_from_string(value);
+        }
+        return this._super.apply(this, [value]);
+    },
 });
 /**
  * Implementation of the ``datetime`` openerp field type:
