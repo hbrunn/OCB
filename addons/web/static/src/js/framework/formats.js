@@ -135,6 +135,28 @@ function parse_value (value, descriptor, value_if_empty) {
             return tmp;
         case 'monetary':
         case 'float':
+            if(_t.database.parameters.decimal_point &&
+               _t.database.parameters.decimal_point !== ".") {
+                /* If this is a localization where the decimal point is not the dot, accept it
+                   regardless as such if this is unambigous so that users can still use the numeric
+                   keypad to enter decimals
+                */
+                var first_separator,
+                    index = value.lastIndexOf(".");
+                if(_t.database.parameters.grouping.length && _t.database.parameters.grouping[0] > 0)
+                    first_separator = _t.database.parameters.grouping[0];
+                else {
+                    var digits = descriptor.digits ? descriptor.digits : [69,2];
+                    digits = typeof digits === "string" ? py.eval(digits) : digits;
+                    first_separator = digits[1] + 1;
+                }
+                if(index > -1) {
+                    if(value.length - (index + 1) < first_separator) {
+                        value = value.substr(0,index) +
+                        _t.database.parameters.decimal_point + value.substr(index+1);
+                    }
+                }
+            }
             var tmp2 = value;
             do {
                 tmp = tmp2;
