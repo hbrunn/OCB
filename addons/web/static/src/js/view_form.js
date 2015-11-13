@@ -4435,26 +4435,21 @@ instance.web.form.One2ManyListView = instance.web.ListView.extend({
         if (_.isEmpty(this.records.records)){
             return true;
         }
-        current_values = {};
-        _.each(this.editor.form.fields, function(field){
+        var editor = this.make_editor()
+        _.each(editor.form.fields, function(field){
             field._inhibit_on_change_flag = true;
             field.no_rerender = true;
             current_values[field.name] = field.get('value');
         });
         var valid = _.every(this.records.records, function(record){
-            _.each(self.editor.form.fields, function(field){
+            _.each(editor.form.fields, function(field){
                 field.set_value(record.attributes[field.name]);
             });
-            return _.every(self.editor.form.fields, function(field){
+            return _.every(editor.form.fields, function(field){
                 field.process_modifiers();
                 field._check_css_flags();
                 return field.is_valid();
             });
-        });
-        _.each(this.editor.form.fields, function(field){
-            field.set('value', current_values[field.name]);
-            field._inhibit_on_change_flag = false;
-            field.no_rerender = false;
         });
         return valid;
     },
