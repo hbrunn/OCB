@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+import operator
 import re
 import datetime
 from lxml import etree
