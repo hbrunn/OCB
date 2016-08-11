@@ -419,7 +419,7 @@ class configmanager(object):
             elif isinstance(self.options[arg], basestring) and self.casts[arg].type in optparse.Option.TYPE_CHECKER:
                 self.options[arg] = optparse.Option.TYPE_CHECKER[self.casts[arg].type](self.casts[arg], arg, self.options[arg])
 
-        for option in ['logfile', 'data_dir']:
+        for option in ['logfile']:
             if self.options[option]:
                 self.options[option] = os.path.abspath(os.path.expanduser(
                     os.path.expandvars(self.options[option])))
