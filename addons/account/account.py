@@ -1673,7 +1673,10 @@ class account_move(osv.osv):
         # Create analytic lines for the valid moves
         obj_move_line.create_analytic_lines(
             cr, uid,
-            [line.id for record in valid_moves for line in record.line_id],
+            [
+                line.id for record in valid_moves for line in record.line_id
+                if line.analytic_account_id
+            ],
             context
         )
 
