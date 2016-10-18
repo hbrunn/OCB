@@ -1055,11 +1055,11 @@ class account_invoice(osv.osv):
             ctx_copy.pop('lang', None)
             move_id = move_obj.create(cr, uid, move, context=ctx_copy)
             new_move_name = move_obj.browse(cr, uid, move_id, context=ctx).name
-            # make the invoice point to that move
-            self.write(cr, uid, [inv.id], {'move_id': move_id,'period_id':period_id, 'move_name':new_move_name}, context=ctx)
             # Pass invoice in context in method post: used if you want to get the same
             # account move reference when creating the same invoice after a cancelled one:
             move_obj.post(cr, uid, [move_id], context=ctx)
+            # make the invoice point to that move
+            self.write(cr, uid, [inv.id], {'move_id': move_id,'period_id':period_id, 'move_name':new_move_name}, context=ctx)
         self._log_event(cr, uid, ids)
         return True
 
