@@ -253,7 +253,12 @@ class account_move_line(osv.osv):
 
         # Compute simple values
         data = super(account_move_line, self).default_get(cr, uid, fields, context=context)
-        if context.get('journal_id'):
+        if context.get('journal_id') and (
+            not fields or
+            'debit' in fields or 'credit' in fields or 'name' in fields or
+            'partner_id' in fields or 'account_id' in fields or
+            'currency_id' in fields or 'amount_currency' in fields
+        ):
             total = 0.0
             #in account.move form view, it is not possible to compute total debit and credit using
             #a browse record. So we must use the context to pass the whole one2many field and compute the total
