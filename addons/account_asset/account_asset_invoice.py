@@ -26,6 +26,15 @@ class account_invoice(osv.osv):
     _inherit = 'account.invoice'
     def action_number(self, cr, uid, ids, *args, **kargs):
         result = super(account_invoice, self).action_number(cr, uid, ids, *args, **kargs)
+        # only do the browse if necessary
+        cr.execute(
+            'select l.id from account_invoice_line l '
+            'join account_invoice i on l.invoice_id=i.id '
+            'where l.asset_category_id is not null and i.id in %s',
+            (tuple(ids),)
+        )
+        if not cr.rowcount:
+            return result
         for inv in self.browse(cr, uid, ids):
             self.pool.get('account.invoice.line').asset_create(cr, uid, inv.invoice_line)
         return result
