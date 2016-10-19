@@ -4633,16 +4633,33 @@ class BaseModel(object):
         :rtype: object or list of objects requested
 
         """
+        if (context or {}).get('__use_browse_record_cache'):
+            # so to use the cache, set the context key above
+            # take care to cleanup from time to time for bigger operations,
+            # otherwise your ram runs full and the performance gain is gone
+            key = (
+                self._name, uid,
+                tuple(select) if isinstance(select, list) else select,
+                frozenset((context or {}).iteritems())
+            )
+            record_cache = cr.__dict__.get('__browse_record_cache__', {})
+            if not record_cache:
+                cr.__dict__['__browse_record_cache__'] = record_cache
+            elif key in record_cache:
+                    return record_cache[key]
+
         self._list_class = list_class or browse_record_list
         cache = {}
         # need to accepts ints and longs because ids coming from a method
         # launched by button in the interface have a type long...
+        result = browse_null()
         if isinstance(select, (int, long)):
-            return browse_record(cr, uid, select, self, cache, context=context, list_class=self._list_class, fields_process=fields_process)
+            result = browse_record(cr, uid, select, self, cache, context=context, list_class=self._list_class, fields_process=fields_process)
         elif isinstance(select, list):
-            return self._list_class((browse_record(cr, uid, id, self, cache, context=context, list_class=self._list_class, fields_process=fields_process) for id in select), context=context)
-        else:
-            return browse_null()
+            result = self._list_class((browse_record(cr, uid, id, self, cache, context=context, list_class=self._list_class, fields_process=fields_process) for id in select), context=context)
+        if (context or {}).get('__use_browse_record_cache'):
+            record_cache[key] = result
+        return result
 
     def _store_get_values(self, cr, uid, ids, fields, context):
         """Returns an ordered list of fields.functions to call due to
