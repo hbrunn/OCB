@@ -197,6 +197,8 @@ class account_move_line(osv.osv):
                }
 
     def create_analytic_lines(self, cr, uid, ids, context=None):
+        if (context or {}).get('inhibit_create_analytic_lines'):
+            return True
         acc_ana_line_obj = self.pool.get('account.analytic.line')
         for obj_line in self.browse(cr, uid, ids, context=context):
             if obj_line.analytic_lines:
