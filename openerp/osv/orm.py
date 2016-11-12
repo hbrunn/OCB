@@ -1555,6 +1555,9 @@ class BaseModel(object):
         lng = context.get('lang')
         trans = self.pool.get('ir.translation')
         error_msgs = []
+        if context.get('__inhibit_validate'):
+            self._invalids.clear()
+            return
         for constraint in self._constraints:
             fun, msg, fields = constraint
             # We don't pass around the context here: validation code
@@ -3701,9 +3704,9 @@ class BaseModel(object):
                             * if user tries to bypass access rules for read on the requested object
 
         """
-
         if not context:
             context = {}
+
         self.check_access_rights(cr, user, 'read')
         fields = self.check_field_access_rights(cr, user, 'read', fields)
         if isinstance(ids, (int, long)):
@@ -3719,7 +3722,8 @@ class BaseModel(object):
                     r[key] = False
 
         if isinstance(ids, (int, long, dict)):
-            return result and result[0] or False
+            result = result and result[0] or False
+
         return result
 
     def _read_flat(self, cr, user, ids, fields_to_read, context=None, load='_classic_read'):

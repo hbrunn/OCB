@@ -853,10 +853,12 @@ class account_move_line(osv.osv):
         if context is None:
             context = {}
         company_list = []
-        for line in self.browse(cr, uid, ids, context=context):
-            if company_list and not line.company_id.id in company_list:
-                raise osv.except_osv(_('Warning!'), _('To reconcile the entries company should be the same for all entries.'))
-            company_list.append(line.company_id.id)
+        cr.execute(
+            'select company_id from account_move_line where id in %s '
+            'group by company_id', (tuple(ids),)
+        )
+        if cr.rowcount > 1:
+            raise osv.except_osv(_('Warning!'), _('To reconcile the entries company should be the same for all entries.'))
         for line in unrec_lines:
             if line.state <> 'valid':
                 raise osv.except_osv(_('Error!'),
@@ -974,7 +976,7 @@ class account_move_line(osv.osv):
         for id in ids:
             wf_service.trg_trigger(uid, 'account.move.line', id, cr)
 
-        if lines and lines[0]:
+        if lines and lines[0] and context.get('inhibit_mark_as_reconciled'):
             partner_id = lines[0].partner_id and lines[0].partner_id.id or False
             if partner_id and not partner_obj.has_something_to_reconcile(cr, uid, partner_id, context=context):
                 partner_obj.mark_as_reconciled(cr, uid, [partner_id], context=context)
