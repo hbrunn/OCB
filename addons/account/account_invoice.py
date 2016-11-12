@@ -1089,38 +1089,44 @@ class account_invoice(osv.osv):
         }
 
     def action_number(self, cr, uid, ids, context=None):
-        if context is None:
-            context = {}
-        #TODO: not correct fix but required a frech values before reading it.
-        self.write(cr, uid, ids, {})
-
-        for obj_inv in self.browse(cr, uid, ids, context=context):
-            invtype = obj_inv.type
-            number = obj_inv.number
-            move_id = obj_inv.move_id and obj_inv.move_id.id or False
-            reference = obj_inv.reference or ''
-
-            self.write(cr, uid, ids, {'internal_number': number})
-
-            if invtype in ('in_invoice', 'in_refund'):
-                if not reference:
-                    ref = self._convert_ref(cr, uid, number)
-                else:
-                    ref = reference
-            else:
-                ref = self._convert_ref(cr, uid, number)
-
-            cr.execute('UPDATE account_move SET ref=%s ' \
-                    'WHERE id=%s AND (ref is null OR ref = \'\')',
-                    (ref, move_id))
-            cr.execute('UPDATE account_move_line SET ref=%s ' \
-                    'WHERE move_id=%s AND (ref is null OR ref = \'\')',
-                    (ref, move_id))
-            cr.execute('UPDATE account_analytic_line SET ref=%s ' \
-                    'FROM account_move_line ' \
-                    'WHERE account_move_line.move_id = %s ' \
-                        'AND account_analytic_line.move_id = account_move_line.id',
-                        (ref, move_id))
+        cr.execute(
+            'update account_invoice set internal_number=number where id in %s',
+            (tuple(ids),)
+        )
+        cr.execute(
+            '''update account_move set ref=case
+            when i.type in ('in_invoice', 'in_refund') then coalesce(
+                i.reference, replace(i.number, '/', ''), '')
+            else coalesce(replace(i.number, '/', ''), '')
+            end
+            from account_invoice i
+            where i.move_id=account_move.id and i.id in %s
+            ''',
+            (tuple(ids),)
+        )
+        cr.execute(
+            '''update account_move_line set ref=case
+            when i.type in ('in_invoice', 'in_refund') then coalesce(
+                i.reference, replace(i.number, '/', ''), '')
+            else coalesce(replace(i.number, '/', ''), '')
+            end
+            from account_invoice i
+            where i.move_id=account_move_line.move_id and i.id in %s
+            ''',
+            (tuple(ids),)
+        )
+        cr.execute(
+            '''update account_analytic_line set ref=case
+            when i.type in ('in_invoice', 'in_refund') then coalesce(
+                i.reference, replace(i.number, '/', ''), '')
+            else coalesce(replace(i.number, '/', ''), '')
+            end
+            from account_invoice i, account_move_line ml
+            where i.move_id=ml.move_id and account_analytic_line.move_id=ml.id
+            and i.id in %s
+            ''',
+            (tuple(ids),)
+        )
         return True
 
     def action_proforma(self, cr, uid, ids, context=None):
