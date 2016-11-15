@@ -4640,7 +4640,10 @@ class BaseModel(object):
             key = (
                 self._name, uid,
                 tuple(select) if isinstance(select, list) else select,
-                frozenset((context or {}).iteritems())
+                frozenset(
+                    (key, value) for key, value in (context or {}).iteritems()
+                    if value.__hash__
+                )
             )
             record_cache = cr.__dict__.get('__browse_record_cache__', {})
             if not record_cache:
