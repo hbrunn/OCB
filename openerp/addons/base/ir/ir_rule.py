@@ -108,7 +108,7 @@ class ir_rule(osv.osv):
         if mode not in self._MODES:
             raise ValueError('Invalid mode: %r' % (mode,))
 
-        if uid == SUPERUSER_ID:
+        if uid == SUPERUSER_ID or model_name == 'ir.rule':
             return None
         cr.execute("""SELECT r.id
                 FROM ir_rule r
