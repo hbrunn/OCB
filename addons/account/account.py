@@ -1336,7 +1336,10 @@ class account_move(osv.osv):
         if context is None:
             context = {}
         invoice = context.get('invoice', False)
-        valid_moves = self.validate(cr, uid, ids, context)
+
+        valid_moves = ids
+        if not context.get('novalidate'):
+            valid_moves = self.validate(cr, uid, ids, context)
 
         if not valid_moves:
             raise osv.except_osv(_('Error!'), _('You cannot validate a non-balanced entry.\nMake sure you have configured payment terms properly.\nThe latest payment term line should be of the "Balance" type.'))
@@ -1443,7 +1446,9 @@ class account_move(osv.osv):
             c['journal_id'] = vals['journal_id']
             if 'date' in vals: c['date'] = vals['date']
             result = super(account_move, self).create(cr, uid, vals, c)
-            tmp = self.validate(cr, uid, [result], context)
+            tmp = [result]
+            if not context.get('novalidate'):
+                tmp = self.validate(cr, uid, [result], context)
             journal = self.pool.get('account.journal').browse(cr, uid, vals['journal_id'], context)
             if journal.entry_posted and tmp:
                 self.button_validate(cr,uid, [result], context)
