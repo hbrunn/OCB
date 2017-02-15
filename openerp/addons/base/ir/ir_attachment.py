@@ -441,7 +441,6 @@ class ir_attachment(osv.osv):
     @api.model
     @tools.ormcache('version', 'xmlid', 'inc', 'asset_type')
     def _get_asset_attachments(self, version, xmlid, inc, asset_type):
-        print version, xmlid, inc, asset_type
         """return assets for a view given by its xmlid"""
         domain = [
             # this first proposition is not really necessary, but nudges
