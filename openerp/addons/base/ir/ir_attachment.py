@@ -451,4 +451,4 @@ class ir_attachment(osv.osv):
                 ('%%' if inc is None else '.%s' % inc), asset_type)
             )
         ]
-        return self.search(domain)
+        return self.search(domain, order='name asc')
