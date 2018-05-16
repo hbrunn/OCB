@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
+import collections
 import logging
 
 from openerp import SUPERUSER_ID
@@ -35,6 +36,8 @@ class hr_employee_category(osv.Model):
     def name_get(self, cr, uid, ids, context=None):
         if not ids:
             return []
+        if not isinstance(ids, collections.Iterable):
+            ids = [ids]
         reads = self.read(cr, uid, ids, ['name','parent_id'], context=context)
         res = []
         for record in reads:
