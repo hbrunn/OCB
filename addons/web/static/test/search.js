@@ -915,7 +915,7 @@ openerp.testing.section('search.serialization', {
             values: [{label: "Foo", value: 42}]
         });
 
-        deepEqual(f.get_domain(facet), [['foo', 'boos', 'Foo']],
+        deepEqual(f.get_domain(facet), [['foo', 'boos', 42]],
             "m2o should use label with custom operators");
         deepEqual(f.get_context(facet), {default_foo: 42},
             "m2o should use value as context default");
@@ -937,14 +937,14 @@ openerp.testing.section('search.serialization', {
             "[['filter', 'is', self]]"
         ]);
         deepEqual(domain.get_eval_context(), {
-            self: "Foo"
+            self: 42
         }, "custom domain's self should be label");
         var context = f.get_context(facet);
         deepEqual(context.__contexts, [
             "{'whee': self}"
         ]);
         deepEqual(context.get_eval_context(), {
-            self: "Foo"
+            self: 42
         }, "custom context's self should be label");
     });
 
