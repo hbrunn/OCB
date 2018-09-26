@@ -85,6 +85,11 @@ instance.web.strip_raw_chars = function (value) {
     return output.join('');
 };
 var normalize_format = function (format) {
+    if(!Date.normalizeFormat) {
+        // TODO: this happens with phantomjs on myrkheim (not locally)
+        // couldn't find out why, but this way, we fix it
+        Date.normalizeFormat = function(f) { return f; };
+    }
     return Date.normalizeFormat(instance.web.strip_raw_chars(format));
 };
 
