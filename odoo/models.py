@@ -3569,6 +3569,7 @@ class BaseModel(object):
 
         if unknown:
             _logger.warning("%s.write() with unknown fields: %s", self._name, ', '.join(sorted(unknown)))
+            _logger.info("Unknown fields: %s", str(vals))
 
         protected_fields = map(self._fields.get, new_vals)
         with self.env.protecting(protected_fields, self):
@@ -3741,6 +3742,7 @@ class BaseModel(object):
 
         if unknown_fields:
             _logger.warning('No such field(s) in model %s: %s.', self._name, ', '.join(unknown_fields))
+            _logger.info("Unknown fields: %s", str(vals))
 
         # check Python constraints
         self._validate_fields(vals)
@@ -3856,6 +3858,7 @@ class BaseModel(object):
 
         if unknown:
             _logger.warning("%s.create() includes unknown fields: %s", self._name, ', '.join(sorted(unknown)))
+            _logger.info("Unknown fields: %s", str(vals))
 
         # create record with old-style fields
         record = self.browse(self._create(old_vals))
