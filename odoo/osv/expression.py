@@ -984,6 +984,8 @@ class expression(object):
                     ids2 = comodel.search(dom).ids
                     if comodel == model:
                         push(create_substitution_leaf(leaf, ('id', 'in', ids2), model))
+                    elif not ids2:
+                        push(create_substitution_leaf(leaf, FALSE_LEAF))
                     else:
                         subquery = 'SELECT "%s" FROM "%s" WHERE "%s" IN %%s' % (rel_id1, rel_table, rel_id2)
                         # avoid flattening of argument in to_sql()
