@@ -213,7 +213,7 @@ class IrActionsReport(models.Model):
             return None
         attachment_vals = {
             'name': attachment_name,
-            'datas': base64.encodestring(buffer.getvalue()),
+            'datas': base64.encodebytes(buffer.getvalue()),
             'res_model': self.model,
             'res_id': record.id,
             'type': 'binary',
@@ -572,7 +572,7 @@ class IrActionsReport(models.Model):
         # In that case, return directly the attachment content.
         # In that way, we also ensure the embedded files are well preserved.
         if len(save_in_attachment) == 1 and not pdf_content:
-            return list(save_in_attachment.values())[0].getvalue()
+            return base64.decodebytes(list(save_in_attachment.values())[0].getvalue())
 
         # Create a list of streams representing all sub-reports part of the final result
         # in order to append the existing attachments and the potentially modified sub-reports
