@@ -224,7 +224,6 @@ def module_boot(db=None):
     addons = serverside + dbside
     return addons
 
-
 def fs2web(path):
     """convert FS path into web path"""
     return '/'.join(path.split(os.path.sep))
