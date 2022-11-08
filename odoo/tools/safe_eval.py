@@ -89,7 +89,8 @@ _EXPR_OPCODES = _CONST_OPCODES.union(set(opmap[x] for x in [
     'LIST_APPEND', 'MAP_ADD', 'SET_ADD',
     'COMPARE_OP',
     # py39
-    'LIST_EXTEND', 'CONTAINS_OP', 'IS_OP',
+    'LIST_EXTEND', 'CONTAINS_OP', 'IS_OP', 'DICT_MERGE', 'SET_UPDATE',
+    'DICT_UPDATE',
 ] if x in opmap))
 
 _SAFE_OPCODES = _EXPR_OPCODES.union(set(opmap[x] for x in [
