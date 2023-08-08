@@ -854,7 +854,7 @@ class Users(models.Model):
         # use read() to not read other fields: this must work while modifying
         # the schema of models res.users or res.partner
         try:
-            values = user.read(list(name_to_key), load=False)[0]
+            values = user.with_context(prefetch_fields=False).read(list(name_to_key), load=False)[0]
         except IndexError:
             # user not found, no context information
             return frozendict()
